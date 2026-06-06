@@ -1,0 +1,26 @@
+# Python virtual environments
+venv/
+*/venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment files
+.env
+*/.env
+
+# Docker / local data
+postgres_data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Logs
+*.log

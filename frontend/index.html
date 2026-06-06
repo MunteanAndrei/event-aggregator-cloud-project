@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Aggregator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Event Aggregator</h1>
+        <p>Find public events collected from multiple web sources.</p>
+    </header>
+
+    <section class="filters">
+         <input type="text" id="cityInput" placeholder="Filter by city">
+         <input type="text" id="categoryInput" placeholder="Filter by category">
+         <button onclick="loadEvents()">Search</button>
+         <button onclick="clearFilters()">Clear</button>
+         <button onclick="runScraper()">Run Scraper</button>
+    </section>
+
+<p id="scraperMessage" class="scraper-message"></p>
+
+    <main>
+        <div id="eventsContainer" class="events-container"></div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

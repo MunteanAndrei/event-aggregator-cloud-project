@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: event_aggregator_db
+    restart: always
+    environment:
+      POSTGRES_DB: events_db
+      POSTGRES_USER: events_user
+      POSTGRES_PASSWORD: events_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  event-api:
+    build: ./event-api
+    container_name: event_api_service
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://events_user:events_password@postgres:5432/events_db
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  scraper-service:
+    build: ./scraper-service
+    container_name: scraper_service
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://events_user:events_password@postgres:5432/events_db
+    ports:
+      - "8001:8001"
+    depends_on:
+      - postgres
+  
+  frontend:
+    build: ./frontend
+    container_name: frontend_service
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - event-api
+      - scraper-service
+
+volumes:
+  postgres_data:
