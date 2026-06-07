@@ -243,56 +243,62 @@ PostgreSQL Database
 
 ---
 
-## 7. Proposed Google Cloud Architecture
+## 7. Google Cloud Architecture
 
-For production deployment, the application can be moved to Google Cloud Platform.
+For the production deployment, the application was deployed on Google Cloud Platform using Cloud Run and Cloud Firestore.
 
-The proposed GCP services are:
+The selected Google Cloud services are:
 
 ```text
 Cloud Run
-Cloud SQL
-Cloud Scheduler
+Cloud Firestore
+Cloud Build
+Artifact Registry
 Cloud Logging
 Cloud Monitoring
 IAM
-Artifact Registry
-Cloud Build
 ```
 
-The proposed architecture is:
+The deployed architecture is:
 
 ```text
 User / Browser
       |
       v
-Cloud Run - Frontend Service
+Cloud Run - Event Aggregator Application
+      |
+      |--- Frontend
+      |--- Event API
+      |--- Scraper API
       |
       v
-Cloud Run - Event API Service
-      |
-      v
-Cloud SQL - PostgreSQL Database
+Cloud Firestore - events collection
 
 
-Cloud Scheduler
+Cloud Build
       |
       v
-Cloud Run - Scraper Service
-      |
-      v
-Public Event Sources
+Builds container image from source code
 
-Cloud Run - Scraper Service
+
+Artifact Registry
       |
       v
-Cloud SQL - PostgreSQL Database
+Stores container image used by Cloud Run
 
 
 Cloud Logging / Cloud Monitoring / IAM
 ```
 
-The diagram exported as `gcp-architecture-diagram.png` can be included in this section.
+The live application URL is:
+
+```text
+https://event-aggregator-app-373732692778.europe-west1.run.app/
+```
+
+The Firestore database stores event documents inside the `events` collection.
+
+This deployment was selected because it reduces costs compared to a Cloud SQL deployment while still using managed Google Cloud services.
 
 ---
 
@@ -300,91 +306,115 @@ The diagram exported as `gcp-architecture-diagram.png` can be included in this s
 
 ### 8.1 Cloud Run
 
-Cloud Run is used to deploy the containerized services:
+Cloud Run is used to deploy the containerized Event Aggregator application.
 
-- Frontend Service
-- Event API Service
-- Scraper Service
-
-Cloud Run is suitable for this project because the services are already containerized using Docker.
-
-Advantages:
-
-- No server management
-- Automatic scaling
-- HTTPS endpoints
-- Independent deployment for each service
-
----
-
-### 8.2 Cloud SQL
-
-Cloud SQL is used as the managed PostgreSQL database.
-
-In the local version, PostgreSQL runs as a Docker container. In the cloud version, this would be replaced by Cloud SQL.
-
-Advantages:
-
-- Managed database service
-- Automated backups
-- High availability options
-- Easier maintenance
-- Integration with Cloud Run
-
----
-
-### 8.3 Cloud Scheduler
-
-Cloud Scheduler can be used to trigger the Scraper Service periodically.
-
-For example, it can call:
+In the cloud version, the application contains:
 
 ```text
-POST /scrape
+Frontend
+Event API
+Scraper API
 ```
 
-once per day.
+inside one Cloud Run service.
 
-This allows the system to collect new events automatically.
+Cloud Run was selected because it supports containerized applications, automatic scaling, HTTPS endpoints and a low-cost deployment model.
+
+The deployed Cloud Run service is:
+
+```text
+event-aggregator-app
+```
+
+Live URL:
+
+```text
+https://event-aggregator-app-373732692778.europe-west1.run.app/
+```
 
 ---
 
-### 8.4 Cloud Logging
+### 8.2 Cloud Firestore
 
-Cloud Logging collects logs from all Cloud Run services.
+Cloud Firestore is used as the managed cloud database.
 
-It helps with:
+The application stores events in the following collection:
 
-- Debugging API errors
-- Checking scraper execution
-- Detecting database connection problems
-- Analyzing service startup logs
+```text
+events
+```
+
+Each event document contains:
+
+```text
+title
+description
+city
+location
+category
+event_date
+source_name
+source_url
+created_at
+updated_at
+```
+
+Firestore was selected instead of Cloud SQL in order to reduce infrastructure costs while still using a managed Google Cloud storage service.
 
 ---
 
-### 8.5 Cloud Monitoring
+### 8.3 Cloud Build
 
-Cloud Monitoring can be used to observe the health and performance of the application.
+Cloud Build was used automatically during deployment from source code.
+
+When running the deployment command, Google Cloud built the container image from the source code and Dockerfile.
+
+---
+
+### 8.4 Artifact Registry
+
+Artifact Registry stores the container image created by Cloud Build.
+
+Cloud Run uses this image to start the deployed service.
+
+---
+
+### 8.5 Cloud Logging
+
+Cloud Logging collects logs from the deployed Cloud Run service.
+
+It can be used to inspect:
+
+```text
+API errors
+scraper execution logs
+Firestore connection errors
+service startup logs
+```
+
+---
+
+### 8.6 Cloud Monitoring
+
+Cloud Monitoring can be used to observe the deployed Cloud Run service.
 
 It can monitor:
 
-- Request count
-- Error rate
-- Latency
-- Container health
-- Database metrics
+```text
+request count
+error rate
+latency
+container health
+availability
+```
 
 ---
 
-### 8.6 IAM
+### 8.7 IAM
 
-IAM is used to control access between services.
+IAM controls access to Google Cloud resources.
 
-Examples:
-
-- Allow Cloud Run services to access Cloud SQL
-- Allow Cloud Scheduler to invoke the Scraper Service
-- Restrict access to sensitive resources
+It is used to allow the deployed Cloud Run service to access Firestore and to manage public access to the application.
 
 ---
 
