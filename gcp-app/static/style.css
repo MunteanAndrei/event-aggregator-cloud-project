@@ -1,0 +1,88 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    color: #222;
+}
+
+header {
+    background: #1f2937;
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+.filters {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding: 20px;
+    background: white;
+    flex-wrap: wrap;
+}
+
+.filters input {
+    padding: 10px;
+    width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.filters button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+}
+
+.filters button:hover {
+    background: #1d4ed8;
+}
+
+.scraper-message {
+    text-align: center;
+    font-weight: bold;
+    color: #2563eb;
+}
+
+.events-container {
+    max-width: 1000px;
+    margin: 30px auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.event-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.event-card h2 {
+    margin-top: 0;
+    color: #1f2937;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #e0ecff;
+    color: #1d4ed8;
+    border-radius: 12px;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.empty {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 18px;
+}
