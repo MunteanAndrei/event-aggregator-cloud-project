@@ -1,50 +1,55 @@
-# Event Aggregator - Final Report
+# Event Aggregator - Raport final
 
-## 1. Application Description
+## 1. Descrierea aplicației
 
-The selected project follows the Red Pill direction, where the source code is developed from scratch. The application is called Event Aggregator and it is a web application based on a microservices architecture.
+Proiectul ales urmează direcția Red Pill, ceea ce înseamnă că aplicația a fost dezvoltată de la zero. Aplicația se numește **Event Aggregator** și este o aplicație web bazată pe o arhitectură de tip microservicii.
 
-The main purpose of the application is to collect public event information, store it in a database, and expose the data through REST APIs. Users can access a web interface where they can view events and filter them by city or category.
+Scopul principal al aplicației este colectarea informațiilor despre evenimente publice, stocarea acestora într-o bază de date și expunerea datelor prin interfețe API REST. Utilizatorii pot accesa o interfață web unde pot vizualiza evenimentele și le pot filtra după oraș sau categorie.
 
-The application contains two separate API interfaces:
+Aplicația conține două interfețe API principale:
 
-- Event API Service
-- Scraper Service
+- **Event API**, pentru accesarea și filtrarea evenimentelor;
+- **Scraper API**, pentru colectarea și inserarea evenimentelor în baza de date.
 
-The Event API Service is responsible for exposing event data to the frontend. The Scraper Service is responsible for collecting event data and saving it into the database.
-
-The application was developed locally using Docker and Docker Compose, but the architecture is designed so that it can be deployed on Google Cloud Platform.
+În varianta locală, aplicația a fost dezvoltată folosind Docker, Docker Compose și PostgreSQL. Pentru varianta de producție pe Google Cloud Platform, aplicația a fost deployată folosind **Cloud Run** și **Cloud Firestore**, pentru a reduce costurile și pentru a folosi servicii gestionate de Google Cloud.
 
 ---
 
-## 2. Functional Requirements
+## 2. Funcționalități principale
 
-The application provides the following main features:
+Aplicația oferă următoarele funcționalități:
 
-- Display public events in a web interface
-- Filter events by city
-- Filter events by category
-- Store event data in PostgreSQL
-- Avoid duplicate events using the event source URL
-- Trigger the scraper from the frontend
-- Preview events collected by the scraper
-- Expose event data through a REST API
-- Expose scraper operations through a separate REST API
-- Run all services using Docker Compose
+- afișarea evenimentelor într-o interfață web;
+- filtrarea evenimentelor după oraș;
+- filtrarea evenimentelor după categorie;
+- stocarea evenimentelor într-o bază de date;
+- evitarea duplicatelor folosind câmpul `source_url`;
+- rularea scraperului din interfața web;
+- previzualizarea evenimentelor colectate de scraper;
+- expunerea datelor printr-un API REST pentru evenimente;
+- expunerea operațiilor de scraping printr-un API REST separat;
+- rularea locală a aplicației folosind Docker Compose;
+- deployment pe Google Cloud Platform folosind Cloud Run și Firestore.
 
 ---
 
-## 3. Data Model
+## 3. Modelul de date
 
-The main entity used by the application is the Event entity.
+Entitatea principală folosită de aplicație este entitatea **Event**.
 
-The database table is called:
+În varianta locală, datele sunt stocate într-un tabel PostgreSQL numit:
 
 ```text
 events
 ```
 
-The table contains the following fields:
+În varianta cloud, datele sunt stocate în Cloud Firestore într-o colecție numită:
+
+```text
+events
+```
+
+Câmpurile principale ale unui eveniment sunt:
 
 ```text
 id
@@ -60,56 +65,60 @@ created_at
 updated_at
 ```
 
-### Field Description
+### Descrierea câmpurilor
 
-| Field | Description |
+| Câmp | Descriere |
 |---|---|
-| id | Unique identifier of the event |
-| title | Name of the event |
-| description | Short description of the event |
-| city | City where the event takes place |
-| location | More specific event location |
-| category | Event category, such as Music, Technology, Food or Business |
-| event_date | Date and time of the event |
-| source_name | Name of the source from which the event was collected |
-| source_url | URL of the event source |
-| created_at | Timestamp when the event was inserted |
-| updated_at | Timestamp when the event was last updated |
+| id | Identificatorul unic al evenimentului |
+| title | Titlul evenimentului |
+| description | Descriere scurtă a evenimentului |
+| city | Orașul în care are loc evenimentul |
+| location | Locația exactă sau aproximativă |
+| category | Categoria evenimentului, de exemplu Music, Technology, Food, Business |
+| event_date | Data și ora evenimentului |
+| source_name | Numele sursei din care a fost colectat evenimentul |
+| source_url | URL-ul sursei evenimentului |
+| created_at | Data la care evenimentul a fost inserat |
+| updated_at | Data ultimei actualizări |
 
-The `source_url` field is unique and is used to prevent duplicate events from being inserted into the database.
+Câmpul `source_url` este folosit pentru a preveni inserarea evenimentelor duplicate. Dacă un eveniment cu același `source_url` există deja, acesta este ignorat de scraper.
 
 ---
 
-## 4. Implementation Technologies
+## 4. Tehnologii folosite
 
-The following technologies were used:
+Pentru implementarea proiectului au fost folosite următoarele tehnologii:
 
 ```text
 Python
 FastAPI
 SQLAlchemy
 PostgreSQL
+Cloud Firestore
 HTML
 CSS
 JavaScript
 Docker
 Docker Compose
 Nginx
+Cloud Run
+Cloud Build
+Artifact Registry
 ```
 
-FastAPI was used for the backend microservices because it provides a simple way to build REST APIs and automatically generates Swagger documentation.
+FastAPI a fost folosit pentru implementarea API-urilor, deoarece permite dezvoltarea rapidă a serviciilor REST și generează automat documentație Swagger.
 
-PostgreSQL was used as the relational database.
+PostgreSQL a fost folosit local pentru testarea aplicației într-un mediu apropiat de unul real.
 
-Docker was used to containerize all services.
+Cloud Firestore a fost folosit în varianta cloud deoarece este un serviciu gestionat, are costuri reduse pentru un proiect mic și este acceptat în cerințele proiectului ca soluție de stocare în Google Cloud.
 
-Docker Compose was used to start the entire local system with a single command.
+Docker a fost folosit pentru containerizarea aplicației, iar Docker Compose pentru rularea locală a tuturor serviciilor.
 
 ---
 
-## 5. Local Microservices Architecture
+## 5. Arhitectura locală bazată pe microservicii
 
-The application contains the following services:
+În varianta locală, aplicația conține următoarele servicii:
 
 ```text
 frontend
@@ -120,18 +129,18 @@ postgres
 
 ### 5.1 Frontend Service
 
-The frontend service is responsible for the user interface.
+Frontend-ul este responsabil pentru interfața cu utilizatorul.
 
-It allows the user to:
+Acesta permite:
 
-- View events
-- Filter events by city
-- Filter events by category
-- Trigger the scraper service
+- vizualizarea evenimentelor;
+- filtrarea după oraș;
+- filtrarea după categorie;
+- rularea scraperului printr-un buton.
 
-The frontend is implemented using HTML, CSS and JavaScript and is served using Nginx.
+Frontend-ul este implementat folosind HTML, CSS și JavaScript și este servit local prin Nginx.
 
-Local URL:
+URL local:
 
 ```text
 http://127.0.0.1:3000
@@ -141,29 +150,29 @@ http://127.0.0.1:3000
 
 ### 5.2 Event API Service
 
-The Event API Service is implemented using FastAPI.
+Event API Service este implementat folosind FastAPI.
 
-Its main responsibilities are:
+Responsabilități principale:
 
-- Return all events
-- Return filtered events
-- Create events
-- Return one event by ID
-- Delete events
+- returnarea tuturor evenimentelor;
+- filtrarea evenimentelor;
+- crearea unui eveniment;
+- returnarea unui eveniment după ID;
+- ștergerea unui eveniment.
 
-Local URL:
+URL local:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-Swagger documentation:
+Documentație Swagger locală:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-Main endpoints:
+Endpoint-uri principale:
 
 ```text
 GET /events
@@ -176,28 +185,28 @@ DELETE /events/{event_id}
 
 ### 5.3 Scraper Service
 
-The Scraper Service is also implemented using FastAPI.
+Scraper Service este implementat tot cu FastAPI.
 
-Its main responsibilities are:
+Responsabilități principale:
 
-- Check scraper status
-- Preview collected events
-- Insert collected events into PostgreSQL
-- Skip duplicate events
+- verificarea statusului scraperului;
+- previzualizarea evenimentelor colectate;
+- inserarea evenimentelor în baza de date;
+- evitarea evenimentelor duplicate.
 
-Local URL:
+URL local:
 
 ```text
 http://127.0.0.1:8001
 ```
 
-Swagger documentation:
+Documentație Swagger locală:
 
 ```text
 http://127.0.0.1:8001/docs
 ```
 
-Main endpoints:
+Endpoint-uri principale:
 
 ```text
 GET /scrape/status
@@ -209,20 +218,20 @@ POST /scrape
 
 ### 5.4 PostgreSQL Database
 
-The database stores all collected events.
+În varianta locală, PostgreSQL este folosit pentru stocarea evenimentelor.
 
-Both backend services communicate with the database:
+Ambele servicii backend comunică cu baza de date:
 
-- Event API Service reads and manages event data
-- Scraper Service inserts collected event data
+- Event API Service citește și gestionează evenimentele;
+- Scraper Service inserează evenimentele colectate.
 
-The frontend does not access the database directly.
+Frontend-ul nu comunică direct cu baza de date, ci doar prin API-uri.
 
 ---
 
-## 6. Local Architecture Diagram
+## 6. Arhitectura locală
 
-The local architecture can be described as follows:
+Arhitectura locală poate fi reprezentată astfel:
 
 ```text
 User
@@ -241,13 +250,15 @@ Scraper Service
 PostgreSQL Database
 ```
 
+Această arhitectură demonstrează separarea responsabilităților între componente și respectă principiile unei aplicații bazate pe microservicii.
+
 ---
 
-## 7. Google Cloud Architecture
+## 7. Arhitectura Google Cloud Platform
 
-For the production deployment, the application was deployed on Google Cloud Platform using Cloud Run and Cloud Firestore.
+Pentru deployment-ul în producție, aplicația a fost publicată pe Google Cloud Platform folosind **Cloud Run** și **Cloud Firestore**.
 
-The selected Google Cloud services are:
+Serviciile Google Cloud folosite sunt:
 
 ```text
 Cloud Run
@@ -259,7 +270,13 @@ Cloud Monitoring
 IAM
 ```
 
-The deployed architecture is:
+Aplicația live este disponibilă la:
+
+```text
+https://event-aggregator-app-373732692778.europe-west1.run.app/
+```
+
+Arhitectura cloud folosită este:
 
 ```text
 User / Browser
@@ -290,25 +307,19 @@ Stores container image used by Cloud Run
 Cloud Logging / Cloud Monitoring / IAM
 ```
 
-The live application URL is:
+În varianta cloud, aplicația este rulată într-un singur serviciu Cloud Run. Acesta conține interfața web, Event API și Scraper API. Datele sunt salvate în Cloud Firestore, în colecția `events`.
 
-```text
-https://event-aggregator-app-373732692778.europe-west1.run.app/
-```
-
-The Firestore database stores event documents inside the `events` collection.
-
-This deployment was selected because it reduces costs compared to a Cloud SQL deployment while still using managed Google Cloud services.
+Această variantă a fost aleasă pentru a reduce costurile față de o soluție bazată pe Cloud SQL, păstrând totuși utilizarea unor servicii gestionate din Google Cloud Platform.
 
 ---
 
-## 8. Description of GCP Components
+## 8. Descrierea componentelor GCP
 
 ### 8.1 Cloud Run
 
-Cloud Run is used to deploy the containerized Event Aggregator application.
+Cloud Run este folosit pentru rularea aplicației containerizate.
 
-In the cloud version, the application contains:
+În varianta cloud, aplicația conține într-un singur serviciu:
 
 ```text
 Frontend
@@ -316,17 +327,15 @@ Event API
 Scraper API
 ```
 
-inside one Cloud Run service.
+Cloud Run a fost ales deoarece permite rularea containerelor fără administrarea directă a serverelor. De asemenea, oferă scalare automată, endpoint HTTPS și un model de cost potrivit pentru proiecte mici.
 
-Cloud Run was selected because it supports containerized applications, automatic scaling, HTTPS endpoints and a low-cost deployment model.
-
-The deployed Cloud Run service is:
+Serviciul deployat se numește:
 
 ```text
 event-aggregator-app
 ```
 
-Live URL:
+URL live:
 
 ```text
 https://event-aggregator-app-373732692778.europe-west1.run.app/
@@ -336,15 +345,15 @@ https://event-aggregator-app-373732692778.europe-west1.run.app/
 
 ### 8.2 Cloud Firestore
 
-Cloud Firestore is used as the managed cloud database.
+Cloud Firestore este folosit ca bază de date gestionată în cloud.
 
-The application stores events in the following collection:
+Aplicația stochează evenimentele în colecția:
 
 ```text
 events
 ```
 
-Each event document contains:
+Fiecare document din colecție conține câmpurile:
 
 ```text
 title
@@ -359,76 +368,82 @@ created_at
 updated_at
 ```
 
-Firestore was selected instead of Cloud SQL in order to reduce infrastructure costs while still using a managed Google Cloud storage service.
+Firestore a fost ales în locul Cloud SQL pentru a reduce costurile și pentru a folosi un serviciu gestionat de Google Cloud. Pentru un proiect de dimensiuni mici, Firestore este suficient pentru stocarea și citirea evenimentelor.
 
 ---
 
 ### 8.3 Cloud Build
 
-Cloud Build was used automatically during deployment from source code.
+Cloud Build a fost folosit automat în timpul deployment-ului.
 
-When running the deployment command, Google Cloud built the container image from the source code and Dockerfile.
+La rularea comenzii de deployment, Google Cloud a construit imaginea Docker pornind de la codul sursă și de la fișierul Dockerfile.
 
 ---
 
 ### 8.4 Artifact Registry
 
-Artifact Registry stores the container image created by Cloud Build.
+Artifact Registry este folosit pentru stocarea imaginii container create de Cloud Build.
 
-Cloud Run uses this image to start the deployed service.
+Cloud Run folosește această imagine pentru a porni serviciul deployat.
 
 ---
 
 ### 8.5 Cloud Logging
 
-Cloud Logging collects logs from the deployed Cloud Run service.
+Cloud Logging colectează logurile generate de serviciul Cloud Run.
 
-It can be used to inspect:
+Acesta poate fi folosit pentru:
 
 ```text
-API errors
-scraper execution logs
-Firestore connection errors
-service startup logs
+erori API
+loguri de execuție ale scraperului
+erori de conectare la Firestore
+loguri de pornire ale serviciului
 ```
 
 ---
 
 ### 8.6 Cloud Monitoring
 
-Cloud Monitoring can be used to observe the deployed Cloud Run service.
+Cloud Monitoring poate fi folosit pentru observarea aplicației deployate.
 
-It can monitor:
+Poate monitoriza:
 
 ```text
-request count
-error rate
-latency
-container health
-availability
+numărul de request-uri
+rata de erori
+latența
+starea containerului
+disponibilitatea serviciului
 ```
 
 ---
 
 ### 8.7 IAM
 
-IAM controls access to Google Cloud resources.
+IAM controlează accesul la resursele Google Cloud.
 
-It is used to allow the deployed Cloud Run service to access Firestore and to manage public access to the application.
+În acest proiect, IAM este relevant pentru:
+
+- permisiunea serviciului Cloud Run de a accesa Firestore;
+- gestionarea accesului public la aplicație;
+- securizarea resurselor cloud.
 
 ---
 
-## 9. Deployment Considerations
+## 9. Deployment
 
-The local deployment is done using Docker Compose.
+### 9.1 Deployment local
 
-Command used to start the application:
+Local, aplicația este rulată folosind Docker Compose.
+
+Comanda folosită:
 
 ```bash
 docker compose up --build
 ```
 
-This starts:
+Aceasta pornește următoarele containere:
 
 ```text
 frontend_service
@@ -437,25 +452,58 @@ scraper_service
 event_aggregator_db
 ```
 
-For GCP production deployment, the following steps can be used:
+URL-uri locale:
 
-1. Build Docker images for each service
-2. Push the images to Artifact Registry
-3. Deploy each image to Cloud Run
-4. Create a Cloud SQL PostgreSQL instance
-5. Configure the database connection using environment variables
-6. Configure Cloud Scheduler to call the scraper periodically
-7. Enable Cloud Logging and Cloud Monitoring
+```text
+Frontend:
+http://127.0.0.1:3000
+
+Event API:
+http://127.0.0.1:8000
+
+Scraper Service:
+http://127.0.0.1:8001
+```
 
 ---
 
-## 10. Cloud-Native Maturity Evaluation
+### 9.2 Deployment pe Google Cloud Platform
 
-The application can be evaluated from a cloud-native maturity perspective using three main axes:
+Pentru varianta cloud, a fost creat folderul `gcp-app`, care conține o versiune adaptată pentru Cloud Run și Firestore.
 
-### 10.1 Service Decomposition
+Deployment-ul a fost realizat cu comanda:
 
-The application is split into multiple services:
+```bash
+gcloud run deploy event-aggregator-app \
+  --source . \
+  --region europe-west1 \
+  --allow-unauthenticated \
+  --max-instances 1
+```
+
+Această comandă a realizat următorii pași:
+
+1. a încărcat codul sursă în Google Cloud;
+2. a construit imaginea Docker folosind Cloud Build;
+3. a salvat imaginea în Artifact Registry;
+4. a creat serviciul Cloud Run;
+5. a expus aplicația public printr-un URL HTTPS.
+
+URL-ul aplicației live este:
+
+```text
+https://event-aggregator-app-373732692778.europe-west1.run.app/
+```
+
+---
+
+## 10. Evaluarea maturității cloud-native
+
+Aplicația poate fi evaluată din perspectiva arhitecturii cloud-native pe trei axe principale: descompunerea în servicii, scalabilitatea și automatizarea.
+
+### 10.1 Descompunerea în servicii
+
+În varianta locală, aplicația este împărțită în servicii separate:
 
 ```text
 Frontend Service
@@ -464,122 +512,178 @@ Scraper Service
 Database
 ```
 
-Each service has a separate responsibility.
+Fiecare serviciu are o responsabilitate clară.
 
-This improves modularity and makes the application easier to maintain.
+Această separare ajută la mentenanță, testare și extindere.
 
----
+În varianta cloud, pentru reducerea costurilor, serviciile sunt grupate într-un singur serviciu Cloud Run, dar interfețele API rămân separate logic:
 
-### 10.2 Scalability and Elasticity
-
-The proposed GCP deployment uses Cloud Run, which allows services to scale independently.
-
-For example:
-
-- The Event API can scale based on user traffic
-- The Scraper Service can run only when needed
-- The Frontend Service can scale separately
-
-This is better than deploying the entire application as a single monolithic service.
+```text
+Event API
+Scraper API
+```
 
 ---
 
-### 10.3 Automation and Manageability
+### 10.2 Scalabilitate și elasticitate
 
-The application is containerized and can be deployed using automated tools.
+Cloud Run permite scalarea automată a aplicației în funcție de trafic.
 
-Possible automation tools:
+Pentru reducerea costurilor, deployment-ul a fost configurat cu:
+
+```text
+--max-instances 1
+```
+
+Astfel, aplicația poate rula cu costuri minime, dar poate fi extinsă ulterior prin creșterea numărului de instanțe.
+
+Într-o variantă de producție mai avansată, Event API și Scraper API ar putea fi deployate ca servicii Cloud Run separate, pentru scalare independentă.
+
+---
+
+### 10.3 Automatizare și administrare
+
+Deployment-ul folosește servicii gestionate:
 
 ```text
 Cloud Build
 Artifact Registry
-Cloud Run deployments
-Cloud Scheduler
+Cloud Run
+Cloud Firestore
 ```
 
-The use of environment variables makes the application easier to move between local and cloud environments.
+Cloud Build automatizează construirea imaginii Docker, iar Artifact Registry stochează imaginea. Cloud Run rulează aplicația fără a necesita administrarea unui server.
+
+Prin folosirea variabilelor de mediu și a serviciilor gestionate, aplicația poate fi mutată mai ușor între mediul local și mediul cloud.
 
 ---
 
-## 11. SLA Considerations
+## 11. Considerente SLA
 
-From an SLA perspective, the most important components are:
+Din perspectiva SLA, cele mai importante componente sunt:
 
 ```text
-Frontend Service
-Event API Service
-Cloud SQL Database
+Cloud Run Service
+Cloud Firestore
+Frontend
+Event API
 ```
 
-If the Event API or the database is unavailable, users cannot view events.
+Dacă Event API sau Firestore nu sunt disponibile, utilizatorii nu pot vizualiza evenimentele.
 
-The Scraper Service is less critical because the application can still display already collected events even if the scraper is temporarily unavailable.
+Scraper API este mai puțin critic, deoarece aplicația poate afișa în continuare evenimentele deja colectate, chiar dacă scraperul nu rulează temporar.
 
-### 11.1 Event API SLA Considerations
+### 11.1 Disponibilitatea Event API
 
-The Event API should be highly available because it is used directly by the frontend.
+Event API trebuie să fie disponibil deoarece frontend-ul depinde de el pentru afișarea evenimentelor.
 
-Possible improvements:
+Îmbunătățiri posibile:
 
-- Deploy the Event API on Cloud Run
-- Allow multiple instances
-- Monitor error rate and latency
-- Use alerts for repeated failures
-
----
-
-### 11.2 Database SLA Considerations
-
-The database is critical because both backend services depend on it.
-
-Possible improvements:
-
-- Use Cloud SQL automated backups
-- Enable high availability if required
-- Monitor storage and connections
-- Restrict access using IAM and network rules
+- monitorizarea ratei de erori;
+- monitorizarea latenței;
+- configurarea de alerte;
+- creșterea numărului maxim de instanțe Cloud Run dacă traficul crește.
 
 ---
 
-### 11.3 Scraper SLA Considerations
+### 11.2 Disponibilitatea bazei de date Firestore
 
-The Scraper Service is not as critical as the Event API.
+Firestore este componenta critică pentru stocarea evenimentelor.
 
-If it fails, existing events remain available.
+Îmbunătățiri posibile:
 
-Possible improvements:
-
-- Use Cloud Scheduler retries
-- Log scraper errors
-- Monitor scraper execution results
-- Send alerts if the scraper repeatedly fails
+- monitorizarea operațiilor de citire și scriere;
+- verificarea erorilor în Cloud Logging;
+- folosirea regulilor IAM pentru controlul accesului;
+- export periodic al datelor pentru backup, dacă proiectul devine mai mare.
 
 ---
 
-## 12. Testing
+### 11.3 Disponibilitatea Scraper API
 
-The following tests were performed locally:
+Scraper API este important pentru actualizarea datelor, dar nu este la fel de critic ca Event API.
 
-- Event API started successfully
-- Scraper Service started successfully
-- PostgreSQL container started successfully
-- Frontend started successfully
-- Events were inserted into the database
-- Duplicate events were skipped
-- Events were displayed in the frontend
-- Filtering by city worked successfully
-- Filtering by category worked successfully
-- Run Scraper button successfully called the Scraper Service
-- All services were started using Docker Compose
+Dacă scraperul eșuează, evenimentele deja salvate rămân disponibile.
+
+Îmbunătățiri posibile:
+
+- logarea execuțiilor scraperului;
+- monitorizarea răspunsului endpoint-ului `/scrape`;
+- configurarea unei rulări periodice cu Cloud Scheduler;
+- alerte în cazul unor erori repetate.
 
 ---
 
-## 13. Conclusion
+## 12. Testare
 
-The Event Aggregator project satisfies the requirements of the Red Pill direction.
+Au fost realizate următoarele teste:
 
-The application was developed from scratch and follows a microservices architecture. It contains two separate API interfaces, one for event access and one for scraper operations.
+### Teste locale
 
-The application uses PostgreSQL for data storage and is containerized using Docker. It can be deployed to Google Cloud Platform using Cloud Run, Cloud SQL and Cloud Scheduler.
+- Event API pornește corect;
+- Scraper Service pornește corect;
+- containerul PostgreSQL pornește corect;
+- frontend-ul pornește corect;
+- evenimentele sunt inserate în baza de date;
+- evenimentele duplicate sunt ignorate;
+- evenimentele sunt afișate în frontend;
+- filtrarea după oraș funcționează;
+- filtrarea după categorie funcționează;
+- butonul Run Scraper apelează Scraper Service;
+- toate serviciile pornesc folosind Docker Compose.
 
-The project demonstrates the use of cloud-native principles such as service separation, containerization, independent scalability and managed cloud services.
+### Teste pe Google Cloud
+
+- aplicația Cloud Run este accesibilă public;
+- interfața web se încarcă din Cloud Run;
+- endpoint-ul `/events` returnează evenimentele din Firestore;
+- endpoint-ul `/scrape/preview` returnează evenimentele colectate;
+- endpoint-ul `/scrape` inserează evenimente în Firestore;
+- colecția `events` este vizibilă în Cloud Firestore;
+- filtrarea după oraș și categorie funcționează în aplicația live.
+
+---
+
+## 13. Linkuri utile
+
+Repository GitHub:
+
+```text
+https://github.com/MunteanAndrei/event-aggregator-cloud-project
+```
+
+Aplicație live GCP:
+
+```text
+https://event-aggregator-app-373732692778.europe-west1.run.app/
+```
+
+Events API live:
+
+```text
+https://event-aggregator-app-373732692778.europe-west1.run.app/events
+```
+
+Scraper Preview live:
+
+```text
+https://event-aggregator-app-373732692778.europe-west1.run.app/scrape/preview
+```
+
+Swagger live:
+
+```text
+https://event-aggregator-app-373732692778.europe-west1.run.app/docs
+```
+
+---
+
+## 14. Concluzie
+
+Proiectul **Event Aggregator** îndeplinește cerințele direcției Red Pill, deoarece aplicația a fost dezvoltată de la zero.
+
+Aplicația folosește o arhitectură bazată pe microservicii în varianta locală și conține două interfețe API separate: Event API și Scraper API.
+
+Pentru stocarea datelor, aplicația folosește PostgreSQL în mediul local și Cloud Firestore în mediul Google Cloud. Deployment-ul în cloud a fost realizat folosind Cloud Run, Cloud Build și Artifact Registry.
+
+Proiectul demonstrează folosirea unor principii cloud-native precum separarea responsabilităților, containerizarea, deployment-ul pe servicii gestionate, scalarea automată și monitorizarea prin servicii Google Cloud.
